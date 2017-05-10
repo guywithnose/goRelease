@@ -1,0 +1,17 @@
+_go_release_zsh_autocomplete() {
+
+  local -a opts
+  opts=("${(@f)$(goRelease ${words[@]:1:#words[@]-1} --generate-bash-completion)}")
+
+  if [[ "${opts}" == 'fileCompletion' ]]
+  then
+      _files
+      return
+  fi
+
+  _describe 'values' opts
+
+  return
+}
+
+compdef _go_release_zsh_autocomplete goRelease
