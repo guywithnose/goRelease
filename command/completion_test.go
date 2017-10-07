@@ -12,28 +12,10 @@ import (
 	"github.com/urfave/cli"
 )
 
-func TestRootCompletion(t *testing.T) {
-	set := flag.NewFlagSet("test", 0)
-	app, writer, _ := appWithTestWriters()
-	app.Commands = append(command.Commands, cli.Command{Hidden: true, Name: "don't show"})
-	os.Args = []string{os.Args[0], "release"}
-	command.RootCompletion(cli.NewContext(app, set, nil))
-	assert.Equal(t, "release:Create or update a release\n", writer.String())
-}
-
-func TestRootCompletionConfig(t *testing.T) {
-	set := flag.NewFlagSet("test", 0)
-	app, writer, _ := appWithTestWriters()
-	app.Commands = command.Commands
-	os.Args = []string{os.Args[0], "release", "--config", "--completion"}
-	command.RootCompletion(cli.NewContext(app, set, nil))
-	assert.Equal(t, "fileCompletion\n", writer.String())
-}
-
 func TestReleaseCompletion(t *testing.T) {
 	set := flag.NewFlagSet("test", 0)
 	app, writer, _ := appWithTestWriters()
-	app.Commands = command.Commands
+	app.Flags = command.Flags
 	command.Completion(cli.NewContext(app, set, nil))
 	output := strings.Split(writer.String(), "\n")
 	assert.Equal(
@@ -52,9 +34,9 @@ func TestReleaseCompletion(t *testing.T) {
 
 func TestReleaseCompletionMainPath(t *testing.T) {
 	set := flag.NewFlagSet("test", 0)
-	os.Args = []string{"goRelease", "release", "--mainPath", ""}
+	os.Args = []string{os.Args[0], "release", "--mainPath", "--completion"}
 	app, writer, _ := appWithTestWriters()
-	app.Commands = command.Commands
+	app.Flags = command.Flags
 	command.Completion(cli.NewContext(app, set, nil))
 	output := strings.Split(writer.String(), "\n")
 	assert.Equal(

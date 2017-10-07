@@ -5,6 +5,7 @@ import (
 	"os"
 
 	"github.com/guywithnose/goRelease/command"
+	"github.com/guywithnose/runner"
 	"github.com/urfave/cli"
 )
 
@@ -14,16 +15,17 @@ func main() {
 	app.Version = command.Version
 	app.Author = "Robert Bittle"
 	app.Email = "guywithnose@gmail.com"
-	app.Usage = "goRelease release"
+	app.Usage = "Update a github release with all binaries that can be built"
 
-	app.Commands = command.Commands
 	app.CommandNotFound = func(c *cli.Context, command string) {
 		fmt.Fprintf(c.App.Writer, "%s: '%s' is not a %s command. See '%s --help'.", c.App.Name, command, c.App.Name, c.App.Name)
 		os.Exit(2)
 	}
 
+	app.Flags = command.Flags
+	app.Action = command.CmdRelease(runner.Real{})
 	app.EnableBashCompletion = true
-	app.BashComplete = command.RootCompletion
+	app.BashComplete = command.Completion
 	app.ErrWriter = os.Stderr
 
 	err := app.Run(os.Args)

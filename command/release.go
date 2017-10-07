@@ -35,7 +35,7 @@ func cmdReleaseHelper(c *cli.Context, cmdWrapper runner.Builder) error {
 	}
 
 	if c.NArg() != 4 {
-		return cli.NewExitError("Usage: \"goRelease release {owner} {repo} {tagName} {projectName} --token {token} --apiUrl {apiUrl}\"", 1)
+		return cli.NewExitError("Usage: \"goRelease {owner} {repo} {tagName} {projectName} --token {token} --apiUrl {apiUrl}\"", 1)
 	}
 
 	var err error

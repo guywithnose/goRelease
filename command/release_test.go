@@ -230,7 +230,7 @@ func TestReleaseUsage(t *testing.T) {
 	createFiles(t, mainPath, "tag")
 	app, _, _ := appWithTestWriters()
 	err := command.CmdRelease(&runner.Test{})(cli.NewContext(app, set, nil))
-	assert.EqualError(t, err, "Usage: \"goRelease release {owner} {repo} {tagName} {projectName} --token {token} --apiUrl {apiUrl}\"")
+	assert.EqualError(t, err, "Usage: \"goRelease {owner} {repo} {tagName} {projectName} --token {token} --apiUrl {apiUrl}\"")
 }
 
 func TestReleaseNoToken(t *testing.T) {
