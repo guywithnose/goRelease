@@ -95,7 +95,7 @@ func TestReleaseCompressError(t *testing.T) {
 	expectedCommands := getExpectedCommands(t, mainPath)
 	expectedCommands[1] = runner.NewExpectedCommand(
 		mainPath,
-		"tar -cf /tmp/build/projectName-linux-386-go1.8-tag.tar.gz /tmp/build/projectName-linux-386-go1.8-tag",
+		"gzip /tmp/build/projectName-linux-386-go1.8-tag",
 		"Build error",
 		2,
 	)
@@ -394,6 +394,11 @@ func getExpectedCommands(t *testing.T, mainPath string) []*runner.ExpectedComman
 	for _, build := range command.ValidBuilds {
 		for _, architecture := range build.Architectures {
 			fileName := fmt.Sprintf("%s/projectName-%s-%s-go1.8-tag%s", mainPath, build.OperatingSystem, architecture, build.Extension)
+			extra := ""
+			if build.IncludeTargetParameter {
+				extra = fmt.Sprintf("%s%s ", fileName, build.CompressExtension)
+			}
+
 			expectedCommands = append(
 				expectedCommands,
 				runner.NewExpectedCommand(
@@ -409,10 +414,9 @@ func getExpectedCommands(t *testing.T, mainPath string) []*runner.ExpectedComman
 				runner.NewExpectedCommand(
 					mainPath,
 					fmt.Sprintf(
-						"%s %s%s %s",
-						strings.Join(append([]string{build.CompressBinary}, build.CompressParameters...), " "),
-						fileName,
-						build.CompressExtension,
+						"%s %s%s",
+						build.CompressBinary,
+						extra,
 						fileName,
 					),
 					"",

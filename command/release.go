@@ -127,7 +127,13 @@ func buildBinaries(cmdWrapper runner.Builder, mainPath, projectName, tagName str
 					}
 
 					compressedBinary := fmt.Sprintf("%s%s", fileName, build.CompressExtension)
-					command := append(append([]string{build.CompressBinary}, build.CompressParameters...), compressedBinary, fileName)
+					var command []string
+					if build.IncludeTargetParameter {
+						command = []string{build.CompressBinary, compressedBinary, fileName}
+					} else {
+						command = []string{build.CompressBinary, fileName}
+					}
+
 					cmd := cmdWrapper.New(mainPath, command...)
 					output, err := cmd.CombinedOutput()
 					if err != nil {
