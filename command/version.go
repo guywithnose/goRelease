@@ -4,4 +4,4 @@ package command
 const Name string = "goRelease"
 
 // Version is the current version
-const Version string = "0.0.1"
+const Version string = "0.2.0"
