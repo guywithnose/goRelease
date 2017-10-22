@@ -26,6 +26,7 @@ func TestReleaseCompletion(t *testing.T) {
 			"--mainPath",
 			"--os",
 			"--publish",
+			"--removeOldAssets",
 			"",
 		},
 		output,

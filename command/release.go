@@ -28,6 +28,7 @@ func cmdReleaseHelper(c *cli.Context, cmdWrapper runner.Builder) error {
 	token := c.String("token")
 	apiURL := c.String("apiUrl")
 	publish := c.Bool("publish")
+	removeOldAssets := c.Bool("removeOldAssets")
 	_ = c.StringSlice("os")
 	mainPath := c.String("mainPath")
 	if token == "" {
@@ -60,18 +61,65 @@ func cmdReleaseHelper(c *cli.Context, cmdWrapper runner.Builder) error {
 		return err
 	}
 
+	id := releaseResponse.GetID()
+
 	binaries, err := buildBinaries(cmdWrapper, mainPath, projectName, tagName, c.App.ErrWriter)
 	if err != nil {
 		return err
 	}
 
-	uploadBinaries(client, owner, repo, releaseResponse, binaries, c.App.ErrWriter)
+	if removeOldAssets {
+		err = clearAssets(client, id, owner, repo)
+		if err != nil {
+			return err
+		}
+	}
+
+	uploadBinaries(client, owner, repo, id, binaries, c.App.ErrWriter)
 	return nil
 }
 
-func uploadBinaries(client *github.Client, owner, repo string, releaseResponse *github.RepositoryRelease, binaries <-chan string, errWriter io.Writer) {
+func clearAssets(client *github.Client, id int, owner, repo string) error {
+	assets, err := getAssets(client, id, owner, repo)
+	if err != nil {
+		return err
+	}
+
+	for _, asset := range assets {
+		_, err = client.Repositories.DeleteReleaseAsset(context.Background(), owner, repo, asset.GetID())
+		if err != nil {
+			return err
+		}
+	}
+
+	return err
+}
+
+func getAssets(client *github.Client, id int, owner, repo string) ([]*github.ReleaseAsset, error) {
+	opt := github.ListOptions{
+		PerPage: 100,
+	}
+
+	allAssets := make([]*github.ReleaseAsset, 0, 100)
+	for {
+		assets, resp, err := client.Repositories.ListReleaseAssets(context.Background(), owner, repo, id, &opt)
+		if err != nil {
+			return nil, err
+		}
+
+		allAssets = append(allAssets, assets...)
+
+		if resp.NextPage == 0 {
+			return allAssets, nil
+		}
+
+		opt.Page = resp.NextPage
+	}
+}
+
+func uploadBinaries(client *github.Client, owner, repo string, id int, binaries <-chan string, errWriter io.Writer) {
 	for fileName := range binaries {
-		err := uploadToRelease(client, releaseResponse.GetID(), owner, repo, fileName)
+		err := uploadToRelease(client, id, owner, repo, fileName)
 		if err != nil {
 			fmt.Fprintf(errWriter, "Unable to upload binary %s: %v\n", fileName, err)
 		} else {

@@ -25,4 +25,8 @@ var Flags = []cli.Flag{
 		Name:  "publish",
 		Usage: "Should the new release be published.  If not specified and the release does not exist, the release will be created as draft.",
 	},
+	cli.BoolFlag{
+		Name:  "removeOldAssets",
+		Usage: "Should the old assets be remove before uploading.",
+	},
 }
