@@ -74,6 +74,11 @@ func uploadBinaries(client *github.Client, owner, repo string, releaseResponse *
 		err := uploadToRelease(client, releaseResponse.GetID(), owner, repo, fileName)
 		if err != nil {
 			fmt.Fprintf(errWriter, "Unable to upload binary %s: %v\n", fileName, err)
+		} else {
+			err := os.Remove(fileName)
+			if err != nil {
+				fmt.Fprintf(errWriter, "Unable to cleanup binary %s: %v\n", fileName, err)
+			}
 		}
 	}
 }
@@ -141,6 +146,7 @@ func buildBinaries(cmdWrapper runner.Builder, mainPath, projectName, tagName str
 						files <- fileName
 					} else {
 						files <- compressedBinary
+						_ = os.Remove(fileName)
 					}
 				}
 			}(build, architecture)
